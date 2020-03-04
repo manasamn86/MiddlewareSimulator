@@ -1,0 +1,189 @@
+syntax = "proto3";
+package czm.convivo;
+
+import "google/protobuf/any.proto";
+
+message Message {
+    enum MessageType {
+        UNKNOWN = 0;
+        // Details: ImageForCase
+        LIVE_IMAGE = 1;
+        // Details: ImageForCase
+        RECORDED_IMAGE = 2;
+        // Details: ScanStatus
+        SCANNING_STATUS = 3;
+        // Details: AvailablePathologists
+        AVAILABLE_PATHOLOGISTS = 4;
+        // Details: Error
+        ERROR_OCCURRED = 5;
+        // Details: Case (caseId needs to be empty)
+        START_CASE = 6;
+        // Details: Case
+        CASE_STARTED = 7;
+        // Details: CaseEnd
+        END_CASE = 8;
+        // Details: CaseEnd
+        CASE_ENDED = 11;
+        // Details when sent from CONVIVO: PlatformLogin, Details when sent to CONVIVO: Session
+        LOGIN = 9;
+        // PlatformLogout
+        LOGOUT = 10;
+    }
+
+    MessageType type = 1;
+    google.protobuf.Any details = 2;
+    string sessionID = 3;
+}
+
+message PlatformLogin {
+  string userID = 1;
+  string password = 2;
+}
+
+message PlatformLogout {
+}
+
+message Session {
+  string sessionID = 1;
+  bool authenticated = 2;
+  string message = 3;
+}
+
+message Error {
+
+  enum ErrorType {
+    // Default
+    UNKNOWN = 0;
+    // There ist already a user logged on with the same credentials
+    USER_ALREADY_LOGGED_IN = 1;
+     // User session has expired because no more client available within timeout period
+    USER_SESSION_EXPIRED = 2;
+    //  PlatformLogin is temporarily not available (ZeissID)
+    USER_AUTHENTICATION_SERVICE_NOT_AVAILABLE = 3;
+     // Detection of low frame rate in receiving
+    LOW_FPS_IN_BOUND = 4;
+    // Detection of low frame rate in sending
+    LOW_FPS_OUT_BOUND = 5;
+    // Counter within image is not in sequence
+    IMAGE_COUNTER_INCONSISTENT  = 6;
+  }
+
+  ErrorType type = 1;
+  string message = 2;
+}
+
+message MachineDetails {
+  string serialNumber = 1;
+  string softwareVersion = 2;
+}
+
+message Case {
+  string caseID = 1;
+  // should be filled with PlatformLogin userID from CONVIVO
+  string surgeonID = 2;
+  // should be filled with userID of a Pathologist received by AvailablePathologists
+  string pathologistID = 3;
+  Patient patient = 4;
+  MachineDetails machineDetails = 5;
+  // will be filled by DPS and is optional
+  UserInfo surgeonData = 6;
+  // will be filled by DPS and is optional
+  UserInfo pathologistData = 7;
+}
+
+message CaseEnd {
+  string caseID = 1;
+}
+
+message ScanStatus {
+  bool active = 1;
+  string caseID = 2;
+}
+
+message Image {
+  enum ImageFormat {
+    JPG = 0;
+  }
+  ImageFormat format = 1;
+  bytes data = 2;
+  int32 resolutionWidth = 3;
+  int32 resolutionHeight = 4;
+  int32 targetResolutionWidth = 5;
+  int32 targetResolutionHeight = 6;
+  int64 timestamp = 7;
+  Spot spot = 8;
+}
+
+message ImageMeta {
+  int32 focus = 1;
+  int32 brightness = 2;
+  int32 gain = 3;
+  bool autoBrigthness = 4;
+}
+
+message Spot {
+  string label = 1;
+  RGBColour colour = 2;
+  string comment = 3;
+  string location = 4;
+  string side = 5;
+  string tissueType = 6;
+}
+
+message RGBColour {
+  uint32 r = 1;
+  uint32 g = 2;
+  uint32 b = 3;
+}
+
+message ImageForCase {
+  Image image = 1;
+  ImageMeta meta = 2;
+  string caseID = 3;
+  uint64 counter = 4;
+}
+
+message Patient {
+  PatientID patientID = 1;
+  Sex sex = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string dateOfBirth = 5; // Must be a date in format YYYY-MM-DD (ISO 8601). Example: 2020-01-30
+  string comment = 6;
+}
+
+message PatientID {
+  string patientID = 1;
+  string issuer = 2;
+}
+
+message AvailablePathologists {
+  repeated Pathologist pathologists = 1;
+}
+
+enum Sex {
+  UNKNOWN = 0;
+  FEMALE = 1;
+  MALE = 2;
+  OTHER = 3;
+}
+
+message Pathologist {
+  string userID = 1;
+  string title = 2;
+  string firstName = 3;
+  string lastName = 4;
+}
+
+message UserInfo {
+  string firstName = 1;
+  string lastName = 2;
+  string userID = 3;
+  string emailAddress = 4;
+  repeated Role role = 5;
+  string title = 6;
+  enum Role {
+    SURGEON = 0;
+    PATHOLOGIST = 1;
+  }
+}
