@@ -4,15 +4,15 @@ const app=require('express')();
 const appWs=require('express-ws')(app);
 
 const imageArray=[
-    '/img-full/00000001564413885978.jpg',
-  '/img-full/00000001564413887762.jpg',
-  '/img-full/00000001564413889315.jpg',
-  '/img-full/00000001564413892443.jpg',
-  '/img-full/00000001564413894001.jpg',
-  '/img-full/00000001564413895812.jpg',
-  '/img-full/00000001564413897748.jpg',
-  '/img-full/00000001564413970572.jpg',
-  '/img-full/00000001564413974593.jpg'
+    './img-full/00000001564413885978.jpg',
+  './img-full/00000001564413887762.jpg',
+  './img-full/00000001564413889315.jpg',
+  './img-full/00000001564413892443.jpg',
+  './img-full/00000001564413894001.jpg',
+  './img-full/00000001564413895812.jpg',
+  './img-full/00000001564413897748.jpg',
+  './img-full/00000001564413970572.jpg',
+  './img-full/00000001564413974593.jpg'
 ]
 app.ws('/ws', ws=>{
     ws.on('message', msg=>{
